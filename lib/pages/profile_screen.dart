@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:glint/widgets/profile/car_card.dart';
+import 'package:glint/widgets/profile/info_row.dart';
+import 'package:glint/widgets/profile/location_card.dart';
+import 'package:glint/widgets/profile/car_tile_small.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -117,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
               // Profile Picture Section
               Center(
@@ -126,8 +130,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     GestureDetector(
                       onTap: _showImagePicker,
                       child: Container(
-                        width: 120,
-                        height: 120,
+                        width: 96,
+                        height: 96,
                         decoration: BoxDecoration(
                           color: const Color(0xFFE8F5E8),
                           shape: BoxShape.circle,
@@ -140,14 +144,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ? ClipOval(
                                 child: Image.file(
                                   _selectedImage!,
-                                  width: 120,
-                                  height: 120,
+                                  width: 96,
+                                  height: 96,
                                   fit: BoxFit.cover,
                                 ),
                               )
                             : const Icon(
                                 Icons.sentiment_satisfied,
-                                size: 60,
+                                size: 48,
                                 color: Colors.black,
                               ),
                       ),
@@ -158,8 +162,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: GestureDetector(
                         onTap: _showImagePicker,
                         child: Container(
-                          width: 32,
-                          height: 32,
+                          width: 28,
+                          height: 28,
                           decoration: const BoxDecoration(
                             color: Color(0xFF0D4A58),
                             shape: BoxShape.circle,
@@ -167,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: const Icon(
                             Icons.edit,
                             color: Colors.white,
-                            size: 16,
+                            size: 14,
                           ),
                         ),
                       ),
@@ -176,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // User Name
               const Center(
@@ -185,18 +189,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontFamily: 'Mulish',
                     fontWeight: FontWeight.w800,
-                    fontSize: 24,
+                    fontSize: 20,
                     color: Color(0xFF0D4A58),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
               // Contact Information Section
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.circular(12),
@@ -204,79 +208,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildContactItem(Icons.phone, 'Phone', '+20123456789'),
-                    const SizedBox(height: 16),
-                    _buildContactItem(
-                      Icons.email,
-                      'Email',
-                      'Email@example.com',
+                    const InfoRow(
+                      icon: Icons.phone,
+                      label: 'Phone',
+                      value: '+20123456789',
                     ),
-                    const SizedBox(height: 16),
-                    _buildContactItem(
-                      Icons.calendar_today,
-                      'Joined',
-                      '16 Sep, 2025',
+                    const SizedBox(height: 10),
+                    const InfoRow(
+                      icon: Icons.email,
+                      label: 'Email',
+                      value: 'Email@example.com',
+                    ),
+                    const SizedBox(height: 10),
+                    const InfoRow(
+                      icon: Icons.calendar_today,
+                      label: 'Joined',
+                      value: '16 Sep, 2025',
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // Your Locations Section
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFEEF0EE),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFCBD0CC), width: 1),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Your Locations',
-                          style: TextStyle(
-                            fontFamily: 'Mulish',
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                            color: Color(0xFF0D4A58),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/edit-profile');
-                          },
-                          child: const Text(
-                            'Edit Your Info',
-                            style: TextStyle(
-                              fontFamily: 'Mulish',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Color(0xFFE04703),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      'Your Locations',
+                      style: TextStyle(
+                        fontFamily: 'Mulish',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                        color: Color(0xFF0D4A58),
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildLocationItem(
-                      'Ahmed\'s Office',
-                      'Example St. 6th October',
+                    const SizedBox(height: 12),
+                    const LocationCard(
+                      title: 'Ahmed\'s Office',
+                      address: 'Example St. 6th October',
                     ),
-                    const Divider(color: Color(0xFFE0E0E0), height: 24),
-                    _buildLocationItem(
-                      'Ahmed\'s Office',
-                      'Example St. 6th October',
+                    const SizedBox(height: 8),
+                    const LocationCard(
+                      title: 'Ahmed\'s Office',
+                      address: 'Example St. 6th October',
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              // Edit button aligned to the right below the container
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/edit-profile'),
+                  child: const Text(
+                    'Edit Your Info',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Color(0xFFE04703),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
 
               // Your Cars Section
               const Text(
@@ -289,49 +297,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
-
-              // Car Cards
-              _buildCarCard('Renault', 'Sandero', 'Grey . 2451 س ن'),
               const SizedBox(height: 12),
-              _buildCarCard('Renault', 'Sandero', 'Grey . 2451 س ن'),
-              const SizedBox(height: 12),
-              _buildCarCard('Renault', 'Sandero', 'Grey . 2451 س ن'),
 
-              const SizedBox(height: 24),
-
-              // Add New Car Button
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/add-car'),
-                child: Container(
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFFE0E0E0),
-                      width: 1,
+              // Horizontal car tiles with add button
+              SizedBox(
+                height: 110,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    CarTileSmall(
+                      brand: 'Renault',
+                      model: 'Sandero',
+                      details: 'Grey . 2451 س ن',
+                      onMore: () =>
+                          _showCarOptions(context, 'Renault', 'Sandero'),
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add, color: Color(0xFF0D4A58), size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Add New Car',
-                          style: TextStyle(
-                            fontFamily: 'Mulish',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Color(0xFF0D4A58),
+                    const SizedBox(width: 12),
+                    CarTileSmall(
+                      brand: 'Renault',
+                      model: 'Sandero',
+                      details: 'Grey . 2451 س ن',
+                      onMore: () =>
+                          _showCarOptions(context, 'Renault', 'Sandero'),
+                    ),
+                    const SizedBox(width: 12),
+                    CarTileSmall(
+                      brand: 'Renault',
+                      model: 'Sandero',
+                      details: 'Grey . 2451 س ن',
+                      onMore: () =>
+                          _showCarOptions(context, 'Renault', 'Sandero'),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, '/add-car'),
+                      child: Container(
+                        width: 150,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFE0E0E0),
+                            width: 1,
                           ),
                         ),
-                      ],
+                        child: const Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add,
+                                color: Color(0xFF0D4A58),
+                                size: 18,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Add New Car',
+                                style: TextStyle(
+                                  fontFamily: 'Mulish',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Color(0xFF0D4A58),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
 
@@ -343,60 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildContactItem(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFF666666), size: 20),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Mulish',
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Mulish',
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: Color(0xFF0D4A58),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLocationItem(String title, String address) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Mulish',
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          address,
-          style: const TextStyle(
-            fontFamily: 'Mulish',
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-            color: Color(0xFF666666),
-          ),
-        ),
-      ],
-    );
-  }
+  // Old helpers removed; replaced by widgets
 
   void _showCarOptions(BuildContext context, String brand, String model) {
     showModalBottomSheet(
@@ -463,82 +446,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildCarCard(String brand, String model, String details) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  brand,
-                  style: const TextStyle(
-                    fontFamily: 'Mulish',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  model,
-                  style: const TextStyle(
-                    fontFamily: 'Mulish',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  details,
-                  style: const TextStyle(
-                    fontFamily: 'Mulish',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            width: 120,
-            height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F0F0),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/images/home_car.png',
-                width: 120,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => _showCarOptions(context, brand, model),
-            child: const Icon(
-              Icons.more_vert,
-              color: Color(0xFF666666),
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Car card replaced by CarCard widget
 }

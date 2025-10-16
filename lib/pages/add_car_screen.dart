@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+import 'dart:io' as io;
 
 class AddCarScreen extends StatefulWidget {
   const AddCarScreen({super.key});
@@ -44,6 +48,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
   final TextEditingController _plateNumbersController = TextEditingController();
   final TextEditingController _yearController = TextEditingController();
   bool _isDefault = false;
+  XFile? _pickedImage;
+  Uint8List? _pickedImageBytes; // for web
 
   @override
   void dispose() {
@@ -51,6 +57,27 @@ class _AddCarScreenState extends State<AddCarScreen> {
     _plateNumbersController.dispose();
     _yearController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (file == null) return;
+    if (kIsWeb) {
+      final bytes = await file.readAsBytes();
+      setState(() {
+        _pickedImage = file;
+        _pickedImageBytes = bytes;
+      });
+    } else {
+      setState(() {
+        _pickedImage = file;
+        _pickedImageBytes = null;
+      });
+    }
   }
 
   @override
@@ -117,6 +144,22 @@ class _AddCarScreenState extends State<AddCarScreen> {
                 Row(
                   children: [
                     Expanded(
+                      child: _buildTextField(
+                        controller: _plateNumbersController,
+                        hint: '1234',
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          final text = (value ?? '').replaceAll(' ', '');
+                          // Accept 3 or 4 digits
+                          if (!RegExp(r'^\d{3,4}$').hasMatch(text)) {
+                            return 'Enter 3 or 4 digits';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Directionality(
                         textDirection: TextDirection.rtl,
                         child: _buildTextField(
@@ -126,31 +169,16 @@ class _AddCarScreenState extends State<AddCarScreen> {
                           textCapitalization: TextCapitalization.none,
                           validator: (value) {
                             final text = (value ?? '').replaceAll(' ', '');
-                            // Exactly 3 Arabic letters (ا-ي including Hamza/Ain/Ghain)
+                            // Accept 2 or 3 Arabic letters (ا-ي)
                             final arabic = RegExp(
-                              r'^[\u0621-\u063A\u0641-\u064A]{3}$',
+                              r'^[\u0621-\u063A\u0641-\u064A]{2,3}$',
                             );
                             if (!arabic.hasMatch(text)) {
-                              return 'اكتب ٣ حروف عربية';
+                              return 'Enter 2 or 3 Arabic letters';
                             }
                             return null;
                           },
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildTextField(
-                        controller: _plateNumbersController,
-                        hint: '1234',
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          final text = (value ?? '').replaceAll(' ', '');
-                          if (!RegExp(r'^\d{4}$').hasMatch(text)) {
-                            return '4 digits';
-                          }
-                          return null;
-                        },
                       ),
                     ),
                   ],
@@ -186,27 +214,46 @@ class _AddCarScreenState extends State<AddCarScreen> {
 
                 const SizedBox(height: 16),
                 _buildLabel('Upload Car Photo'),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE04703),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _pickImage,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE04703),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Mulish',
+                          fontWeight: FontWeight.w600,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(
-                        fontFamily: 'Mulish',
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                      child: const Text('Upload Photo'),
                     ),
-                    child: const Text('Upload Photo'),
-                  ),
+                    const SizedBox(width: 12),
+                    if (_pickedImage != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 160,
+                          height: 110,
+                          child: kIsWeb && _pickedImageBytes != null
+                              ? Image.memory(
+                                  _pickedImageBytes!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  io.File(_pickedImage!.path),
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+                      ),
+                  ],
                 ),
 
                 const SizedBox(height: 8),
@@ -229,29 +276,34 @@ class _AddCarScreenState extends State<AddCarScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE04703),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(
-                        fontFamily: 'Mulish',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    child: const Text('Add Car'),
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 100),
               ],
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE04703),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              child: const Text('Add Car'),
             ),
           ),
         ),
@@ -375,6 +427,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
       'plate': '$plateLetters $plateNumbers',
       'year': _yearController.text.trim(),
       'isDefault': _isDefault,
+      'photoPath': _pickedImage?.path,
     };
     Navigator.pop(context, car);
   }
