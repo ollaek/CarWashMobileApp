@@ -149,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               )
                             : const Icon(
-                                Icons.sentiment_satisfied,
+                                Icons.person_outline,
                                 size: 48,
                                 color: Colors.black,
                               ),
@@ -371,6 +371,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               const SizedBox(height: 20),
+
+              // Your Carwash History Section
+              const Text(
+                'Your Carwash History',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  color: Color(0xFF0D4A58),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+                ),
+                child: Column(
+                  children: [
+                    _buildHistoryItem(
+                      'VIP carwash',
+                      'Sat, 13 Sep 2025 / 12:30 PM',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildHistoryItem(
+                      'Basic carwash',
+                      'Sat, 13 Sep 2025 / 12:30 PM',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildHistoryItem(
+                      'VIP carwash',
+                      'Sat, 13 Sep 2025 / 12:30 PM',
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // View Full History Link
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    // TODO: Navigate to full history screen
+                  },
+                  child: const Text(
+                    'View Full History',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Color(0xFFF26A21),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -379,6 +443,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // Old helpers removed; replaced by widgets
+
+  Widget _buildHistoryItem(String carwashType, String dateTime) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          carwashType,
+          style: const TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        Text(
+          dateTime,
+          style: const TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+            color: Color(0xFF9E9E9E),
+          ),
+        ),
+      ],
+    );
+  }
 
   void _showCarOptions(BuildContext context, String brand, String model) {
     showModalBottomSheet(
