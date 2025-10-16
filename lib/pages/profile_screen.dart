@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:glint/widgets/profile/car_card.dart';
 import 'package:glint/widgets/profile/info_row.dart';
 import 'package:glint/widgets/profile/location_card.dart';
 import 'package:glint/widgets/profile/car_tile_small.dart';
