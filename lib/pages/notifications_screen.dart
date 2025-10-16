@@ -8,7 +8,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  List<Map<String, dynamic>> _notifications = [
+  final List<Map<String, dynamic>> _notifications = [
     {
       'id': 1,
       'title': 'Your car wash is complete!',

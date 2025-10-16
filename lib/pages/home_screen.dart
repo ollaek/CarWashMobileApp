@@ -13,7 +13,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   late Timer _timer;
   bool _isUserInteracting = false;
-  int _unreadNotificationCount = 1; // This would typically come from a service
+  final int _unreadNotificationCount =
+      1; // This would typically come from a service
 
   @override
   void initState() {

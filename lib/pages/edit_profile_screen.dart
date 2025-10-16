@@ -22,7 +22,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     text: '123456789',
   );
 
-  List<Map<String, dynamic>> _locations = [
+  final List<Map<String, dynamic>> _locations = [
     {'name': 'Ahmed\'s Office', 'address': 'Example St, 6th October'},
   ];
 
@@ -301,7 +301,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
 
               const SizedBox(height: 16),
 

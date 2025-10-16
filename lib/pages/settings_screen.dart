@@ -82,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _pushNotifications = value;
                     });
                   },
-                  activeColor: const Color(0xFF0D4A58),
+                  activeThumbColor: const Color(0xFF0D4A58),
                 ),
               ),
 
@@ -99,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _locationPermission = value;
                     });
                   },
-                  activeColor: const Color(0xFF0D4A58),
+                  activeThumbColor: const Color(0xFF0D4A58),
                 ),
               ),
 
