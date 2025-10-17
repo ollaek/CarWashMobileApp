@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -10,80 +12,165 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController(
-    text: 'Ahmed Mohamed',
+    text: 'Ethan Carter',
   );
   final TextEditingController _emailController = TextEditingController(
-    text: 'Email@example.com',
-  );
-  final TextEditingController _countryCodeController = TextEditingController(
-    text: '+20',
-  );
-  final TextEditingController _phoneController = TextEditingController(
-    text: '123456789',
+    text: 'ethan.carter@email.com',
   );
 
-  final List<Map<String, dynamic>> _locations = [
-    {'name': 'Ahmed\'s Office', 'address': 'Example St, 6th October'},
-  ];
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
-    _countryCodeController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
-  Future<void> _addLocation() async {
-    final result = await Navigator.pushNamed(context, '/location-picker');
-    if (result != null && result is Map<String, dynamic>) {
-      setState(() {
-        _locations.add({
-          'name': result['name'],
-          'address':
-              'Selected Location', // You can implement reverse geocoding here
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 300,
+        maxHeight: 300,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
         });
-      });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error picking image: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _removeLocation(int index) {
-    setState(() {
-      _locations.removeAt(index);
-    });
+  void _showImagePicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF0D4A58)),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2C3E50)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Edit Profile',
           style: TextStyle(
-            fontFamily: 'Mulish',
+            fontFamily: 'Poppins',
+            fontSize: 20,
             fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFF0D4A58),
+            color: Color(0xFF2C3E50),
           ),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Full Name Section
+              // Profile Picture Section
+              Center(
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: _showImagePicker,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFFE0E0E0),
+                            width: 2,
+                          ),
+                        ),
+                        child: _selectedImage != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  _selectedImage!,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Color(0xFF2C3E50),
+                              ),
+                      ),
+                    ),
+                    // Edit Icon Overlay
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _showImagePicker,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF20B2AA),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Full Name Field
               _buildTextField(
                 controller: _fullNameController,
                 label: 'Full Name',
@@ -96,9 +183,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 },
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
-              // Email Address Section
+              // Email Field
               _buildTextField(
                 controller: _emailController,
                 label: 'Email Address',
@@ -115,216 +202,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 },
               ),
 
-              const SizedBox(height: 12),
-
-              // Phone Number Section
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Phone Number',
-                    style: TextStyle(
-                      fontFamily: 'Mulish',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: Color(0xFF0D4A58),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Country Code Input
-                      SizedBox(
-                        width: 80,
-                        child: TextFormField(
-                          controller: _countryCodeController,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            hintText: '+20',
-                            hintStyle: const TextStyle(
-                              fontFamily: 'Mulish',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Color(0xFF999999),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFB9FAF8),
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFB9FAF8),
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFFF6B35),
-                                width: 1,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Phone Number Input
-                      Expanded(
-                        child: TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            hintText: 'Enter phone number',
-                            hintStyle: const TextStyle(
-                              fontFamily: 'Mulish',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Color(0xFF999999),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFB9FAF8),
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFB9FAF8),
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFFF6B35),
-                                width: 1,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Your Locations Section
-              const Text(
-                'Your Locations',
-                style: TextStyle(
-                  fontFamily: 'Mulish',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: Color(0xFF0D4A58),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Location Cards
-              ..._locations.asMap().entries.map((entry) {
-                int index = entry.key;
-                Map<String, dynamic> location = entry.value;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F0F0),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              location['name'],
-                              style: const TextStyle(
-                                fontFamily: 'Mulish',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                color: Color(0xFF333333),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              location['address'],
-                              style: const TextStyle(
-                                fontFamily: 'Mulish',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14,
-                                color: Color(0xFF666666),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => _removeLocation(index),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE04703),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'Delete',
-                            style: TextStyle(
-                              fontFamily: 'Mulish',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-
-              const SizedBox(height: 16),
-
-              // Add Location Button
-              Row(
-                children: [
-                  const Icon(Icons.add, color: Color(0xFFE04703), size: 20),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: _addLocation,
-                    child: const Text(
-                      'Add Location',
-                      style: TextStyle(
-                        fontFamily: 'Mulish',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Color(0xFF0D4A58),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
               const SizedBox(height: 40),
 
               // Save Changes Button
@@ -334,18 +211,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Handle save changes logic here
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Profile updated successfully!'),
-                          backgroundColor: Color(0xFF0D4A58),
+                          backgroundColor: Color(0xFF20B2AA),
                         ),
                       );
                       Navigator.pop(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE04703),
+                    backgroundColor: const Color(0xFF20B2AA),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -356,14 +232,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     'Save Changes',
                     style: TextStyle(
                       fontFamily: 'Mulish',
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
                   ),
                 ),
               ),
-
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -376,8 +250,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String label,
     required String hintText,
     TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -389,14 +261,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             fontFamily: 'Mulish',
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF0D4A58),
+            color: Color(0xFF2C3E50),
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          obscureText: obscureText,
           validator: validator,
           decoration: InputDecoration(
             hintText: hintText,
@@ -404,20 +275,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               fontFamily: 'Mulish',
               fontWeight: FontWeight.w400,
               fontSize: 16,
-              color: Color(0xFF999999),
+              color: Color(0xFF7F8C8D),
             ),
-            suffixIcon: suffixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFB9FAF8), width: 1),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFB9FAF8), width: 1),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 1),
+              borderSide: const BorderSide(color: Color(0xFF20B2AA), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -425,7 +295,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

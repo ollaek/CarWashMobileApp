@@ -14,6 +14,13 @@ import 'package:glint/pages/edit_profile_screen.dart';
 import 'package:glint/pages/location_picker_screen.dart';
 import 'package:glint/pages/settings_screen.dart';
 import 'package:glint/pages/notifications_screen.dart';
+import 'package:glint/pages/order_complete_screen.dart';
+import 'package:glint/pages/vehicles_screen.dart';
+import 'package:glint/pages/locations_screen.dart';
+import 'package:glint/pages/bookings_screen.dart';
+import 'package:glint/pages/booking_details_screen.dart';
+import 'package:glint/pages/promotions_screen.dart';
+import 'package:glint/pages/support_chat_screen.dart';
 import 'package:glint/widgets/bottom_nav_bar.dart';
 import 'package:glint/theme/app_theme.dart';
 
@@ -47,6 +54,23 @@ class MyApp extends StatelessWidget {
               ModalRoute.of(context)!.settings.arguments as String? ?? '';
           return OtpVerificationScreen(phoneNumber: phoneNumber);
         },
+        '/order-complete': (context) {
+          final arguments =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>?;
+          return OrderCompleteScreen.fromArguments(arguments ?? {});
+        },
+        '/bookings': (context) => const BookingsScreen(),
+        '/booking-details': (context) {
+          final booking =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>?;
+          return BookingDetailsScreen(booking: booking ?? {});
+        },
+        '/vehicles': (context) => const VehiclesScreen(),
+        '/locations': (context) => const LocationsScreen(),
+        '/promotions': (context) => const PromotionsScreen(),
+        '/support-chat': (context) => const SupportChatScreen(),
       },
     );
   }

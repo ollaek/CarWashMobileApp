@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:glint/widgets/car_cleaning_package_card.dart';
-import 'package:glint/widgets/profile/car_tile_small.dart';
+import '../widgets/vehicle_selection_list.dart';
+import '../widgets/location_selection_list.dart';
 
 class RequestScreen extends StatefulWidget {
   const RequestScreen({super.key});
@@ -10,8 +10,14 @@ class RequestScreen extends StatefulWidget {
 }
 
 class _RequestScreenState extends State<RequestScreen> {
+  int currentStep = 0;
   int selectedPackageIndex = 0;
   int selectedCarIndex = 0;
+  int selectedAddressIndex = 0;
+  int selectedDateTimeIndex = 0;
+  int selectedPaymentMethod = 0; // 0 = Credit Card, 1 = PayPal
+  String promoCode = '';
+  bool isPromoApplied = false;
 
   final List<Map<String, dynamic>> packages = [
     {
@@ -64,6 +70,44 @@ class _RequestScreenState extends State<RequestScreen> {
     {'brand': 'Honda', 'model': 'Civic', 'details': 'Black . 5678 ج د'},
   ];
 
+  final List<Map<String, dynamic>> addresses = [
+    {'title': 'Home', 'address': '123 Main St, Cairo', 'isDefault': true},
+    {
+      'title': 'Office',
+      'address': '456 Business Ave, Giza',
+      'isDefault': false,
+    },
+    {
+      'title': 'Other',
+      'address': '789 Other St, Alexandria',
+      'isDefault': false,
+    },
+  ];
+
+  final List<Map<String, dynamic>> timeSlots = [
+    {'time': '9:00 AM', 'available': true},
+    {'time': '10:00 AM', 'available': true},
+    {'time': '11:00 AM', 'available': true},
+    {'time': '12:00 PM', 'available': true},
+    {'time': '1:00 PM', 'available': true},
+    {'time': '2:00 PM', 'available': true},
+    {'time': '3:00 PM', 'available': true},
+    {'time': '4:00 PM', 'available': true},
+    {'time': '5:00 PM', 'available': true},
+  ];
+
+  DateTime selectedDate = DateTime.now().add(
+    const Duration(days: 4),
+  ); // Default to 5th of current month
+  int selectedTimeIndex = 1; // Default to 10:00 AM
+
+  final List<String> stepTitles = [
+    'Choose Your Service',
+    'Select Your Car',
+    'Choose Location',
+    'Pick Date & Time',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,9 +123,13 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Carwash Request',
-          style: TextStyle(
+        title: Text(
+          currentStep < 4
+              ? stepTitles[currentStep]
+              : currentStep == 4
+              ? 'Order Summary'
+              : 'Payment Details',
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w700,
             fontSize: 24,
@@ -138,157 +186,719 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Select Package Title
-            const Text(
-              'Select Package',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-                color: Color(0xFF0D4A58),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Horizontal scrollable package cards
-            SizedBox(
-              height: 320,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: packages.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  final package = packages[index];
-                  return SizedBox(
-                    width: 280,
-                    child: CarCleaningPackageCard(
-                      packageName: package['name'],
-                      duration: package['duration'],
-                      services: List<String>.from(package['services']),
-                      price: package['price'],
-                      isSelected: selectedPackageIndex == index,
-                      onTap: () {
-                        setState(() {
-                          selectedPackageIndex = index;
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Select Car Title
-            const Text(
-              'Select Car',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-                color: Color(0xFF0D4A58),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Horizontal scrollable car tiles
-            SizedBox(
-              height: 110,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: cars.length + 1, // +1 for "Add New Car" tile
-                separatorBuilder: (context, index) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  if (index == cars.length) {
-                    // Add New Car tile
-                    return GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/add-car'),
-                      child: Container(
-                        width: 150,
-                        height: 110,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+      body: Column(
+        children: [
+          // Progress Bar (only for main steps 0-3)
+          if (currentStep < 4) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
                             color: const Color(0xFFE0E0E0),
-                            width: 1,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: (currentStep + 1) / 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0D4A58),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${currentStep + 1}/4',
+                        style: const TextStyle(
+                          fontFamily: 'Mulish',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Step Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: _buildStepContent(),
+            ),
+          ),
+
+          // Navigation Buttons (hidden on order summary and payment screens)
+          if (currentStep < 4) ...[
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  if (currentStep > 0) ...[
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              currentStep--;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF0D4A58)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Previous',
+                            style: TextStyle(
+                              fontFamily: 'Mulish',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: Color(0xFF0D4A58),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _canProceed() ? _nextStep : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0D4A58),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          currentStep == 3 ? 'Continue' : 'Continue',
+                          style: const TextStyle(
+                            fontFamily: 'Mulish',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepContent() {
+    switch (currentStep) {
+      case 0:
+        return _buildServiceSelection();
+      case 1:
+        return _buildCarSelection();
+      case 2:
+        return _buildLocationSelection();
+      case 3:
+        return _buildDateTimeSelection();
+      case 4:
+        return _buildOrderSummary();
+      case 5:
+        return _buildPaymentDetails();
+      default:
+        return _buildServiceSelection();
+    }
+  }
+
+  Widget _buildServiceSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        ...packages.asMap().entries.map((entry) {
+          final index = entry.key;
+          final package = entry.value;
+          final isSelected = selectedPackageIndex == index;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedPackageIndex = index;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFFE0F7FA)
+                      : const Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF00BCD4)
+                        : const Color(0xFFE0E0E0),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                Icons.add,
-                                color: Color(0xFF0D4A58),
-                                size: 18,
-                              ),
-                              SizedBox(width: 6),
                               Text(
-                                'Add New Car',
+                                package['name'],
                                 style: TextStyle(
-                                  fontFamily: 'Mulish',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: Color(0xFF0D4A58),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  color: isSelected
+                                      ? const Color(0xFF0D4A58)
+                                      : const Color(0xFF333333),
+                                ),
+                              ),
+                              Text(
+                                package['price'],
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  color: isSelected
+                                      ? const Color(0xFF0D4A58)
+                                      : const Color(0xFF333333),
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 4),
+                          Text(
+                            package['duration'],
+                            style: const TextStyle(
+                              fontFamily: 'Mulish',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            package['services'].join(', '),
+                            style: const TextStyle(
+                              fontFamily: 'Mulish',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: Color(0xFF333333),
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }
-
-                  final car = cars[index];
-                  return SizedBox(
-                    width: 150,
-                    child: CarTileSmall(
-                      brand: car['brand'],
-                      model: car['model'],
-                      details: car['details'],
-                      isSelected: selectedCarIndex == index,
-                      onTap: () {
-                        setState(() {
-                          selectedCarIndex = index;
-                        });
-                      },
-                      onMore: () {
-                        // TODO: Show car options
-                      },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
             ),
+          );
+        }).toList(),
+      ],
+    );
+  }
 
-            const SizedBox(height: 30),
+  Widget _buildCarSelection() {
+    return VehicleSelectionList(
+      vehicles: cars,
+      selectedIndex: selectedCarIndex,
+      onVehicleSelected: (index) {
+        setState(() {
+          selectedCarIndex = index;
+        });
+      },
+      onAddVehicle: () => Navigator.pushNamed(context, '/add-car'),
+      showAddButton: true,
+      title: 'Select Your Car',
+      isSelectionMode: true,
+    );
+  }
 
-            // Continue Button
+  Widget _buildLocationSelection() {
+    return LocationSelectionList(
+      locations: addresses,
+      selectedIndex: selectedAddressIndex,
+      onLocationSelected: (index) {
+        setState(() {
+          selectedAddressIndex = index;
+        });
+      },
+      onAddLocation: () => Navigator.pushNamed(context, '/location-picker'),
+      showAddButton: true,
+      title: 'Choose Your Location',
+      isSelectionMode: true,
+    );
+  }
+
+  Widget _buildDateTimeSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Calendar Section
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Column(
+            children: [
+              // Calendar Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedDate = DateTime(
+                          selectedDate.year,
+                          selectedDate.month - 1,
+                        );
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: Color(0xFF0D4A58),
+                    ),
+                  ),
+                  Text(
+                    '${_getMonthName(selectedDate.month)} ${selectedDate.year}',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: Color(0xFF0D4A58),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedDate = DateTime(
+                          selectedDate.year,
+                          selectedDate.month + 1,
+                        );
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.chevron_right,
+                      color: Color(0xFF0D4A58),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Days of week
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    'S',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'M',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'T',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'W',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'T',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'F',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  Text(
+                    'S',
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Calendar Grid
+              _buildCalendarGrid(),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Time Selection Section
+        const Text(
+          'Select Time',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Time Slots Grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 2.5,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: timeSlots.length,
+          itemBuilder: (context, index) {
+            final slot = timeSlots[index];
+            final isSelected = selectedTimeIndex == index;
+            final isAvailable = slot['available'] as bool;
+
+            return GestureDetector(
+              onTap: isAvailable
+                  ? () {
+                      setState(() {
+                        selectedTimeIndex = index;
+                      });
+                    }
+                  : null,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: !isAvailable
+                      ? const Color(0xFFF5F5F5)
+                      : isSelected
+                      ? const Color(0xFF00BCD4)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: !isAvailable
+                        ? const Color(0xFFE0E0E0)
+                        : isSelected
+                        ? const Color(0xFF00BCD4)
+                        : const Color(0xFFE0E0E0),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    slot['time'],
+                    style: TextStyle(
+                      fontFamily: 'Mulish',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: !isAvailable
+                          ? const Color(0xFF999999)
+                          : isSelected
+                          ? Colors.white
+                          : const Color(0xFF333333),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendarGrid() {
+    final firstDayOfMonth = DateTime(selectedDate.year, selectedDate.month, 1);
+    final lastDayOfMonth = DateTime(
+      selectedDate.year,
+      selectedDate.month + 1,
+      0,
+    );
+    final firstWeekday = firstDayOfMonth.weekday;
+    final daysInMonth = lastDayOfMonth.day;
+
+    final List<Widget> calendarDays = [];
+
+    // Add empty cells for days before the first day of the month
+    for (int i = 0; i < firstWeekday; i++) {
+      calendarDays.add(const SizedBox());
+    }
+
+    // Add days of the month
+    for (int day = 1; day <= daysInMonth; day++) {
+      final isSelected = selectedDate.day == day;
+      calendarDays.add(
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedDate = DateTime(
+                selectedDate.year,
+                selectedDate.month,
+                day,
+              );
+            });
+          },
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              color: isSelected ? const Color(0xFF00BCD4) : Colors.transparent,
+            ),
+            child: Center(
+              child: Text(
+                '$day',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isSelected ? Colors.white : const Color(0xFF333333),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(children: calendarDays);
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
+  }
+
+  Widget _buildOrderSummary() {
+    final selectedPackage = packages[selectedPackageIndex];
+    final selectedCar = cars[selectedCarIndex];
+    final selectedAddress = addresses[selectedAddressIndex];
+    final selectedTime = timeSlots[selectedTimeIndex];
+
+    // Calculate pricing
+    final packagePrice = _extractPrice(selectedPackage['price']);
+    final serviceFee = 5.0;
+    final total = packagePrice + serviceFee;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+
+        // Service Package Section
+        const Text(
+          'Service Package',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D4A58),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.directions_car,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selectedPackage['name'],
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Color(0xFF0D4A58),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      selectedPackage['services'].join(', '),
+                      style: const TextStyle(
+                        fontFamily: 'Mulish',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Color(0xFF666666),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Vehicle Details Section
+        const Text(
+          'Vehicle Details',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Car Info
+        _buildDetailRow(
+          Icons.directions_car,
+          selectedCar['brand'] + ' ' + selectedCar['model'],
+          selectedCar['details'],
+        ),
+
+        const SizedBox(height: 12),
+
+        // Date & Time
+        _buildDetailRow(
+          Icons.calendar_today,
+          _formatDateTime(selectedDate, selectedTime['time']),
+          null,
+        ),
+
+        const SizedBox(height: 12),
+
+        // Location
+        _buildDetailRow(
+          Icons.location_on,
+          selectedAddress['title'],
+          selectedAddress['address'],
+        ),
+
+        const SizedBox(height: 24),
+
+        // Price Breakdown Section
+        const Text(
+          'Price Breakdown',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Column(
+            children: [
+              _buildPriceRow(selectedPackage['name'], packagePrice),
+              const SizedBox(height: 8),
+              _buildPriceRow('Service Fee', serviceFee),
+              const Divider(color: Color(0xFFE0E0E0), height: 24),
+              _buildPriceRow('Total', total, isTotal: true),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Action Buttons
+        Column(
+          children: [
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Navigate to next step
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Selected: ${packages[selectedPackageIndex]['name']}',
-                      ),
-                      backgroundColor: const Color(0xFF0D4A58),
-                    ),
-                  );
-                },
+                onPressed: _proceedToPayment,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0D4A58),
                   foregroundColor: Colors.white,
@@ -298,7 +908,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   elevation: 0,
                 ),
                 child: const Text(
-                  'Continue',
+                  'Proceed to Payment',
                   style: TextStyle(
                     fontFamily: 'Mulish',
                     fontWeight: FontWeight.w600,
@@ -307,9 +917,515 @@ class _RequestScreenState extends State<RequestScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton(
+                onPressed: _editOrder,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF0D4A58)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Edit Order',
+                  style: TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Color(0xFF0D4A58),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
-      ),
+      ],
     );
+  }
+
+  Widget _buildDetailRow(IconData icon, String title, String? subtitle) {
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFF0D4A58), size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Color(0xFF0D4A58),
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: Color(0xFF666666),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceRow(String label, double amount, {bool isTotal = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+            fontSize: isTotal ? 16 : 14,
+            color: const Color(0xFF0D4A58),
+          ),
+        ),
+        Text(
+          '\$${amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+            fontSize: isTotal ? 16 : 14,
+            color: const Color(0xFF0D4A58),
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _extractPrice(String priceString) {
+    // Extract numeric value from price string like "800 LE"
+    final regex = RegExp(r'(\d+)');
+    final match = regex.firstMatch(priceString);
+    return match != null ? double.parse(match.group(1)!) : 0.0;
+  }
+
+  String _formatDateTime(DateTime date, String time) {
+    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final weekday = weekdays[date.weekday - 1];
+    final month = months[date.month - 1];
+    final day = date.day;
+    final year = date.year;
+
+    return '$weekday, $month $day, $year · $time';
+  }
+
+  Widget _buildPaymentDetails() {
+    final selectedPackage = packages[selectedPackageIndex];
+    final packagePrice = _extractPrice(selectedPackage['price']);
+    final serviceFee = 5.0;
+    final discount = isPromoApplied ? 10.0 : 0.0; // 10% discount for demo
+    final total = packagePrice + serviceFee - discount;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+
+        // Payment Method Section
+        const Text(
+          'Payment Method',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Credit Card Option
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedPaymentMethod = 0;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selectedPaymentMethod == 0
+                    ? const Color(0xFF00BCD4)
+                    : const Color(0xFFE0E0E0),
+                width: selectedPaymentMethod == 0 ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Credit Card',
+                  style: TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Color(0xFF0D4A58),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: selectedPaymentMethod == 0
+                        ? const Color(0xFF00BCD4)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: selectedPaymentMethod == 0
+                          ? const Color(0xFF00BCD4)
+                          : const Color(0xFFE0E0E0),
+                      width: 2,
+                    ),
+                  ),
+                  child: selectedPaymentMethod == 0
+                      ? const Icon(Icons.check, color: Colors.white, size: 12)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // PayPal Option
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedPaymentMethod = 1;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selectedPaymentMethod == 1
+                    ? const Color(0xFF00BCD4)
+                    : const Color(0xFFE0E0E0),
+                width: selectedPaymentMethod == 1 ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Cash On Delivery',
+                  style: TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Color(0xFF0D4A58),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: selectedPaymentMethod == 1
+                        ? const Color(0xFF00BCD4)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: selectedPaymentMethod == 1
+                          ? const Color(0xFF00BCD4)
+                          : const Color(0xFFE0E0E0),
+                      width: 2,
+                    ),
+                  ),
+                  child: selectedPaymentMethod == 1
+                      ? const Icon(Icons.check, color: Colors.white, size: 12)
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Promo Code Section
+        const Text(
+          'Promo Code',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    promoCode = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Enter promo code',
+                  hintStyle: const TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: Color(0xFF999999),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF00BCD4),
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: _applyPromoCode,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF00BCD4)),
+                ),
+                child: const Text(
+                  'Apply',
+                  style: TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF00BCD4),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // Price Breakdown Section
+        const Text(
+          'Price Breakdown',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: Color(0xFF0D4A58),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Column(
+            children: [
+              _buildPaymentPriceRow('Wash', packagePrice),
+              const SizedBox(height: 8),
+              _buildPaymentPriceRow('Service Fee', serviceFee),
+              if (isPromoApplied) ...[
+                const SizedBox(height: 8),
+                _buildPaymentPriceRow('Discount', -discount, isDiscount: true),
+              ],
+              const Divider(color: Color(0xFFE0E0E0), height: 24),
+              _buildPaymentPriceRow('Total', total, isTotal: true),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Book Now Button
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: _bookNow,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00BCD4),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Book Now',
+              style: TextStyle(
+                fontFamily: 'Mulish',
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentPriceRow(
+    String label,
+    double amount, {
+    bool isTotal = false,
+    bool isDiscount = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+            fontSize: isTotal ? 16 : 14,
+            color: const Color(0xFF0D4A58),
+          ),
+        ),
+        Text(
+          '${amount >= 0 ? '\$' : '-\$'}${amount.abs().toStringAsFixed(2)}',
+          style: TextStyle(
+            fontFamily: 'Mulish',
+            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w500,
+            fontSize: isTotal ? 16 : 14,
+            color: isDiscount
+                ? const Color(0xFF00BCD4)
+                : const Color(0xFF0D4A58),
+          ),
+        ),
+      ],
+    );
+  }
+
+  bool _canProceed() {
+    switch (currentStep) {
+      case 0:
+        return selectedPackageIndex >= 0;
+      case 1:
+        return selectedCarIndex >= 0;
+      case 2:
+        return selectedAddressIndex >= 0;
+      case 3:
+        return selectedTimeIndex >= 0;
+      default:
+        return false;
+    }
+  }
+
+  void _nextStep() {
+    if (currentStep < 3) {
+      setState(() {
+        currentStep++;
+      });
+    } else {
+      // Show order summary
+      setState(() {
+        currentStep = 4; // Order summary step
+      });
+    }
+  }
+
+  void _editOrder() {
+    setState(() {
+      currentStep = 3; // Go back to date/time selection
+    });
+  }
+
+  void _proceedToPayment() {
+    setState(() {
+      currentStep = 5; // Go to payment details
+    });
+  }
+
+  void _bookNow() {
+    // Navigate to order complete page with booking details
+    final selectedPackage = packages[selectedPackageIndex];
+    final selectedAddress = addresses[selectedAddressIndex];
+    final selectedTime = timeSlots[selectedTimeIndex];
+
+    Navigator.pushNamed(
+      context,
+      '/order-complete',
+      arguments: {
+        'serviceName': selectedPackage['name'],
+        'date': selectedTime['date'],
+        'time': selectedTime['time'],
+        'location': selectedAddress['address'],
+        'price': selectedPackage['price'],
+      },
+    );
+  }
+
+  void _applyPromoCode() {
+    if (promoCode.isNotEmpty) {
+      setState(() {
+        isPromoApplied = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Promo code applied successfully!'),
+          backgroundColor: Color(0xFF0D4A58),
+        ),
+      );
+    }
   }
 }
