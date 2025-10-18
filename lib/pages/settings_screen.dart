@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glint/services/auth_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -204,6 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsItem(
                 iconPath: 'assets/icons/logout.png',
                 title: 'Log Out',
+                onTap: () => _showLogoutDialog(),
                 child: Container(
                   width: 130,
                   padding: const EdgeInsets.symmetric(
@@ -234,12 +236,111 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      final authService = AuthService();
+      final response = await authService.logout();
+
+      if (response.isSuccess) {
+        if (mounted) {
+          // Navigate to login screen and clear the navigation stack
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/signin',
+            (route) => false,
+          );
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Logged out successfully'),
+              backgroundColor: Color(0xFF20B2AA),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Logout failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        // Even if logout fails, clear local state and redirect
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/signin',
+          (route) => false,
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error: ${e.toString()}'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF2C3E50),
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(fontFamily: 'Mulish', color: Color(0xFF7F8C8D)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  color: Color(0xFF7F8C8D),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _handleLogout();
+              },
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildSettingsItem({
     required String iconPath,
     required String title,
     required Widget child,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    Widget content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       child: Row(
         children: [
@@ -276,5 +377,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 }
