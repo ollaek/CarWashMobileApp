@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../services/auth_service.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> booking;
@@ -254,9 +255,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Ethan Carter',
-                  style: TextStyle(
+                Text(
+                  AuthService().currentUser?.fullName ?? 'User',
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

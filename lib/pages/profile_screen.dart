@@ -61,9 +61,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 16),
 
                   // User Name
-                  const Text(
-                    'Ethan Carter',
-                    style: TextStyle(
+                  Text(
+                    AuthService().currentUser?.fullName ?? 'User',
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -74,9 +74,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 8),
 
                   // Email
-                  const Text(
-                    'ethan.carter@email.com',
-                    style: TextStyle(
+                  Text(
+                    AuthService().currentUser?.email ?? 'user@email.com',
+                    style: const TextStyle(
                       fontFamily: 'Mulish',
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

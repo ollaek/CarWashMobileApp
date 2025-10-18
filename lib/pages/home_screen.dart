@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:glint/services/booking_service.dart';
 import 'package:glint/services/models/service_vehicle_models.dart';
+import 'package:glint/services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -133,10 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 40,
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Hello,',
                             style: TextStyle(
                               fontFamily: 'Mulish',
@@ -146,8 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           Text(
-                            'Ahmed',
-                            style: TextStyle(
+                            AuthService().currentUser?.fullName ?? 'User',
+                            style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               fontSize: 24,
