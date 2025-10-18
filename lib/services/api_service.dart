@@ -368,7 +368,8 @@ class ApiService {
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
-        final servicesData = data['data'] as List<dynamic>;
+        final dataObj = data['data'] as Map<String, dynamic>;
+        final servicesData = dataObj['items'] as List<dynamic>;
         final services = servicesData.map((s) => CarWashService.fromJson(s as Map<String, dynamic>)).toList();
         return ApiResponse.success(services);
       } else {

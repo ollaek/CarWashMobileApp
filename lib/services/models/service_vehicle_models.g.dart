@@ -150,12 +150,12 @@ Map<String, dynamic> _$VehicleToJson(Vehicle instance) => <String, dynamic>{
 
 CarWashService _$CarWashServiceFromJson(Map<String, dynamic> json) =>
     CarWashService(
-      id: (json['id'] as num?)?.toInt(),
-      name: json['name'] as String?,
-      description: json['description'] as String?,
-      price: (json['price'] as num?)?.toDouble(),
-      durationInMinutes: (json['durationInMinutes'] as num?)?.toInt(),
-      isActive: json['isActive'] as bool?,
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      durationInMinutes: (json['durationInMinutes'] as num).toInt(),
+      isActive: json['isActive'] as bool,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),

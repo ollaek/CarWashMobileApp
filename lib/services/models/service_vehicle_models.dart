@@ -160,22 +160,22 @@ class Vehicle {
 @JsonSerializable()
 class CarWashService {
   CarWashService({
-    this.id,
-    this.name,
-    this.description,
-    this.price,
-    this.durationInMinutes,
-    this.isActive,
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.durationInMinutes,
+    required this.isActive,
     this.createdAt,
     this.updatedAt,
   });
 
-  final int? id;
-  final String? name;
-  final String? description;
-  final double? price;
-  final int? durationInMinutes;
-  final bool? isActive;
+  final int id;
+  final String name;
+  final String description;
+  final double price;
+  final int durationInMinutes;
+  final bool isActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 

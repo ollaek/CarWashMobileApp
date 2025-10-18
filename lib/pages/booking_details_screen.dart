@@ -249,7 +249,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             ),
             child: const Icon(Icons.person, color: Color(0xFF2C3E50), size: 30),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           // Technician Info
           Expanded(
             child: Column(
