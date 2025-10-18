@@ -54,6 +54,30 @@ class ApiService {
     }
   }
 
+  Future<ApiResponse<LoginResponse>> socialLogin(SocialLoginCommand command) async {
+    try {
+      final response = await _apiClient.socialLogin(command);
+      final data = response.data as Map<String, dynamic>;
+      
+      if (data['isSuccess'] == true) {
+        final loginData = data['data'] as Map<String, dynamic>;
+        await _tokenStorage.saveTokens(
+          accessToken: loginData['accessToken'] as String,
+          refreshToken: loginData['refreshToken'] as String?,
+        );
+        return ApiResponse.success(LoginResponse.fromJson(loginData));
+      } else {
+        final errors = data['errors'] as List<dynamic>?;
+        final errorMessage = errors?.isNotEmpty == true 
+            ? errors!.first.toString() 
+            : data['message'] as String? ?? 'Social login failed';
+        return ApiResponse.error(errorMessage);
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+  }
+
   Future<ApiResponse<RegisterResponse>> register(RegisterCommand command) async {
     try {
       final response = await _apiClient.register(command);

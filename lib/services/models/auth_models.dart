@@ -101,6 +101,26 @@ class LogoutCommand {
   Map<String, dynamic> toJson() => _$LogoutCommandToJson(this);
 }
 
+@JsonSerializable()
+class SocialLoginCommand {
+  final String provider;
+  final String idToken;
+  final String? email;
+  final String? fullName;
+
+  SocialLoginCommand({
+    required this.provider,
+    required this.idToken,
+    this.email,
+    this.fullName,
+  });
+
+  factory SocialLoginCommand.fromJson(Map<String, dynamic> json) =>
+      _$SocialLoginCommandFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SocialLoginCommandToJson(this);
+}
+
 
 
 

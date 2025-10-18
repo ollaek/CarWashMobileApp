@@ -72,6 +72,9 @@ abstract class ApiClient {
   @POST('/api/Auth/logout')
   Future<HttpResponse<dynamic>> logout(@Body() LogoutCommand body);
 
+  @POST('/api/Auth/social-login')
+  Future<HttpResponse<dynamic>> socialLogin(@Body() SocialLoginCommand body);
+
   // Bookings
   @GET('/api/Bookings')
   Future<HttpResponse<dynamic>> getBookings(

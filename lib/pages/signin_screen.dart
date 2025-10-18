@@ -69,6 +69,47 @@ class _SigninScreenState extends State<SigninScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authService = AuthService();
+      final response = await authService.loginWithGoogle();
+
+      if (response.isSuccess) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Google login failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google login error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -233,10 +274,7 @@ class _SigninScreenState extends State<SigninScreen> {
                     width: double.infinity,
                     height: 56,
                     child: OutlinedButton(
-                      onPressed: () {
-                        // Handle Google login logic here
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
+                      onPressed: _isLoading ? null : _handleGoogleLogin,
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
                           color: Color(0xFFFF6B35),

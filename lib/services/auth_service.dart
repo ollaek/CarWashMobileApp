@@ -2,6 +2,7 @@ import 'package:glint/services/service_locator.dart';
 import 'package:glint/services/api_service.dart';
 import 'package:glint/services/models/auth_models.dart';
 import 'package:glint/services/models/common_models.dart';
+import 'package:glint/services/google_signin_service.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -18,6 +19,42 @@ class AuthService {
     try {
       final command = LoginCommand(email: email, password: password);
       final response = await _apiService.login(command);
+      
+      if (response.isSuccess && response.data != null) {
+        // Create UserProfile from LoginResponse
+        _currentUser = UserProfile(
+          id: response.data!.userId,
+          fullName: response.data!.fullName,
+          email: response.data!.email,
+          phoneNumber: response.data!.phoneNumber,
+          isEmailVerified: response.data!.isEmailVerified,
+        );
+      }
+      
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ApiResponse<LoginResponse>> loginWithGoogle() async {
+    try {
+      // Sign in with Google
+      final googleResult = await GoogleSignInService.signInWithGoogle();
+      if (googleResult == null) {
+        return ApiResponse.error('Google sign-in cancelled');
+      }
+
+      // Create social login command
+      final command = SocialLoginCommand(
+        provider: 'google',
+        idToken: googleResult.idToken,
+        email: googleResult.email,
+        fullName: googleResult.fullName,
+      );
+
+      // Call API
+      final response = await _apiService.socialLogin(command);
       
       if (response.isSuccess && response.data != null) {
         // Create UserProfile from LoginResponse
