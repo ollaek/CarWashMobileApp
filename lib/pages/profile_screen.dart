@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glint/services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -260,6 +261,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      final authService = AuthService();
+      final response = await authService.logout();
+
+      if (response.isSuccess) {
+        if (mounted) {
+          // Navigate to login screen and clear the navigation stack
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/signin',
+            (route) => false,
+          );
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Logged out successfully'),
+              backgroundColor: Color(0xFF20B2AA),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Logout failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        // Even if logout fails, clear local state and redirect
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/signin',
+          (route) => false,
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error: ${e.toString()}'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
   void _showLogoutDialog() {
     showDialog(
       context: context,
@@ -289,15 +340,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
-                // TODO: Implement logout logic
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Logged out successfully'),
-                    backgroundColor: Color(0xFF20B2AA),
-                  ),
-                );
+                await _handleLogout();
               },
               child: const Text(
                 'Logout',

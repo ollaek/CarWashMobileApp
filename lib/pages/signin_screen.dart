@@ -38,12 +38,10 @@ class _SigninScreenState extends State<SigninScreen> {
       );
 
       if (response.isSuccess) {
-        // Login successful
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {
-        // Login failed
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -54,7 +52,6 @@ class _SigninScreenState extends State<SigninScreen> {
         }
       }
     } catch (e) {
-      // Handle network or other errors
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

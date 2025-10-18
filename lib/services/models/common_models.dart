@@ -118,16 +118,24 @@ class UserProfile {
 @JsonSerializable()
 class LoginResponse {
   LoginResponse({
+    this.userId,
+    this.fullName,
+    this.email,
+    this.phoneNumber,
     this.accessToken,
     this.refreshToken,
-    this.expiresIn,
-    this.user,
+    this.isEmailVerified,
+    this.isPhoneVerified,
   });
 
+  final int? userId;
+  final String? fullName;
+  final String? email;
+  final String? phoneNumber;
   final String? accessToken;
   final String? refreshToken;
-  final int? expiresIn;
-  final UserProfile? user;
+  final bool? isEmailVerified;
+  final bool? isPhoneVerified;
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseFromJson(json);

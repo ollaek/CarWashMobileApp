@@ -87,3 +87,91 @@ Map<String, dynamic> _$UpdatePreferencesRequestToJson(
   'deviceToken': instance.deviceToken,
   'deviceType': instance.deviceType,
 };
+
+UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => UserProfile(
+  id: (json['id'] as num?)?.toInt(),
+  fullName: json['fullName'] as String?,
+  email: json['email'] as String?,
+  phoneNumber: json['phoneNumber'] as String?,
+  countryCode: json['countryCode'] as String?,
+  profileImageUrl: json['profileImageUrl'] as String?,
+  isEmailVerified: json['isEmailVerified'] as bool?,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+);
+
+Map<String, dynamic> _$UserProfileToJson(UserProfile instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'fullName': instance.fullName,
+      'email': instance.email,
+      'phoneNumber': instance.phoneNumber,
+      'countryCode': instance.countryCode,
+      'profileImageUrl': instance.profileImageUrl,
+      'isEmailVerified': instance.isEmailVerified,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+    };
+
+LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
+    LoginResponse(
+      userId: (json['userId'] as num?)?.toInt(),
+      fullName: json['fullName'] as String?,
+      email: json['email'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      accessToken: json['accessToken'] as String?,
+      refreshToken: json['refreshToken'] as String?,
+      isEmailVerified: json['isEmailVerified'] as bool?,
+      isPhoneVerified: json['isPhoneVerified'] as bool?,
+    );
+
+Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'fullName': instance.fullName,
+      'email': instance.email,
+      'phoneNumber': instance.phoneNumber,
+      'accessToken': instance.accessToken,
+      'refreshToken': instance.refreshToken,
+      'isEmailVerified': instance.isEmailVerified,
+      'isPhoneVerified': instance.isPhoneVerified,
+    };
+
+RegisterResponse _$RegisterResponseFromJson(Map<String, dynamic> json) =>
+    RegisterResponse(
+      userId: (json['userId'] as num?)?.toInt(),
+      message: json['message'] as String?,
+      requiresEmailVerification: json['requiresEmailVerification'] as bool?,
+    );
+
+Map<String, dynamic> _$RegisterResponseToJson(RegisterResponse instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'message': instance.message,
+      'requiresEmailVerification': instance.requiresEmailVerification,
+    };
+
+Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
+  id: (json['id'] as num?)?.toInt(),
+  title: json['title'] as String?,
+  message: json['message'] as String?,
+  type: json['type'] as String?,
+  isRead: json['isRead'] as bool?,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+);
+
+Map<String, dynamic> _$NotificationToJson(Notification instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'message': instance.message,
+      'type': instance.type,
+      'isRead': instance.isRead,
+      'createdAt': instance.createdAt?.toIso8601String(),
+    };

@@ -43,7 +43,11 @@ class ApiService {
         );
         return ApiResponse.success(LoginResponse.fromJson(loginData));
       } else {
-        return ApiResponse.error(data['message'] as String? ?? 'Login failed');
+        final errors = data['errors'] as List<dynamic>?;
+        final errorMessage = errors?.isNotEmpty == true 
+            ? errors!.first.toString() 
+            : data['message'] as String? ?? 'Login failed';
+        return ApiResponse.error(errorMessage);
       }
     } catch (e) {
       return ApiResponse.error('Network error: ${e.toString()}');
@@ -176,7 +180,7 @@ class ApiService {
   // Vehicle Services
   Future<ApiResponse<List<Vehicle>>> getVehicles({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getVehicles(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.getVehicles(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
@@ -256,7 +260,7 @@ class ApiService {
   // Address Services
   Future<ApiResponse<List<Address>>> getAddresses({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getAddresses(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.getAddresses(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
@@ -336,7 +340,7 @@ class ApiService {
   // Service Services
   Future<ApiResponse<List<CarWashService>>> getServices({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getServices(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.getServices(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
@@ -406,7 +410,7 @@ class ApiService {
   // Booking Services
   Future<ApiResponse<List<Booking>>> getBookings({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getBookings(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.getBookings(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
@@ -439,7 +443,7 @@ class ApiService {
 
   Future<ApiResponse<List<Booking>>> getActiveBookings({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getActiveBookings(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.getActiveBookings(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
@@ -635,7 +639,7 @@ class ApiService {
   // Notification Services
   Future<ApiResponse<List<Notification>>> getNotifications({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.notifications(pageNumber: pageNumber, pageSize: pageSize);
+      final response = await _apiClient.notifications(pageNumber, pageSize);
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {

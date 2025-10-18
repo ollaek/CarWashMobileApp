@@ -1,6 +1,7 @@
 import 'package:glint/services/service_locator.dart';
 import 'package:glint/services/api_service.dart';
 import 'package:glint/services/models/auth_models.dart';
+import 'package:glint/services/models/common_models.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();
@@ -14,14 +15,25 @@ class AuthService {
   bool get isLoggedIn => _currentUser != null;
 
   Future<ApiResponse<LoginResponse>> login(String email, String password) async {
-    final command = LoginCommand(email: email, password: password);
-    final response = await _apiService.login(command);
-    
-    if (response.isSuccess && response.data != null) {
-      _currentUser = response.data!.user;
+    try {
+      final command = LoginCommand(email: email, password: password);
+      final response = await _apiService.login(command);
+      
+      if (response.isSuccess && response.data != null) {
+        // Create UserProfile from LoginResponse
+        _currentUser = UserProfile(
+          id: response.data!.userId,
+          fullName: response.data!.fullName,
+          email: response.data!.email,
+          phoneNumber: response.data!.phoneNumber,
+          isEmailVerified: response.data!.isEmailVerified,
+        );
+      }
+      
+      return response;
+    } catch (e) {
+      rethrow;
     }
-    
-    return response;
   }
 
   Future<ApiResponse<RegisterResponse>> register({
