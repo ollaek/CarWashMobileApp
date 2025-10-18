@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glint/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -26,6 +28,120 @@ class _SignupScreenState extends State<SignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRegistration() async {
+    print('🔐 Registration button clicked!');
+    
+    if (!_formKey.currentState!.validate()) {
+      print('❌ Form validation failed');
+      return;
+    }
+
+    print('✅ Form validation passed');
+    print('📝 Registration data:');
+    print('   Full Name: ${_fullNameController.text.trim()}');
+    print('   Email: ${_emailController.text.trim()}');
+    print('   Phone: ${_phoneController.text.trim()}');
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      print('🚀 Calling AuthService.register...');
+      final authService = AuthService();
+      final response = await authService.register(
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phoneNumber: _phoneController.text.trim(),
+        countryCode: '+20', // Default country code, can be made dynamic
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+      );
+
+      print('📡 Registration API response received:');
+      print('   Success: ${response.isSuccess}');
+      print('   Error: ${response.error}');
+
+      if (response.isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Please check your email for verification.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Navigate to login screen
+          Navigator.pushReplacementNamed(context, '/signin');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Registration failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignUp() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final authService = AuthService();
+      final response = await authService.loginWithGoogle();
+
+      if (response.isSuccess) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Google sign-up failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-up error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -275,17 +391,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Handle signup logic here
-                          // Navigate to OTP verification with phone number
-                          Navigator.pushNamed(
-                            context,
-                            '/otp',
-                            arguments: _phoneController.text,
-                          );
-                        }
-                      },
+                      onPressed: _isLoading ? null : _handleRegistration,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6B35),
                         foregroundColor: Colors.white,
@@ -294,14 +400,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontFamily: 'Mulish',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
+                              style: TextStyle(
+                                fontFamily: 'Mulish',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                   ),
 
@@ -312,10 +427,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     width: double.infinity,
                     height: 56,
                     child: OutlinedButton(
-                      onPressed: () {
-                        // Handle Google signup logic here
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
+                      onPressed: _isLoading ? null : _handleGoogleSignUp,
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(
                           color: Color(0xFFFF6B35),
