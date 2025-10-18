@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:glint/services/api/api_client.dart';
 import 'package:glint/services/api/dio_provider.dart';
 import 'package:glint/services/api/token_storage.dart';
+import 'package:glint/services/auth_service.dart';
 import 'package:glint/services/models/auth_models.dart';
 import 'package:glint/services/models/address_models.dart';
 import 'package:glint/services/models/booking_models.dart';
@@ -204,11 +205,24 @@ class ApiService {
   // Vehicle Services
   Future<ApiResponse<List<Vehicle>>> getVehicles({int? pageNumber, int? pageSize}) async {
     try {
-      final response = await _apiClient.getVehicles(pageNumber, pageSize);
+      // Get current user ID from AuthService
+      final authService = AuthService();
+      final currentUser = authService.currentUser;
+      
+      if (currentUser?.id == null) {
+        return ApiResponse.error('User not logged in');
+      }
+      
+      final response = await _apiClient.getUserVehicles(
+        currentUser!.id!,
+        pageNumber,
+        pageSize,
+      );
       final data = response.data as Map<String, dynamic>;
       
       if (data['isSuccess'] == true) {
-        final vehiclesData = data['data'] as List<dynamic>;
+        final dataObj = data['data'] as Map<String, dynamic>;
+        final vehiclesData = dataObj['items'] as List<dynamic>;
         final vehicles = vehiclesData.map((v) => Vehicle.fromJson(v as Map<String, dynamic>)).toList();
         return ApiResponse.success(vehicles);
       } else {
@@ -379,6 +393,7 @@ class ApiService {
       return ApiResponse.error('Network error: ${e.toString()}');
     }
   }
+
 
   // Lookup Services
   Future<ApiResponse<List<CarBrand>>> getCarBrands() async {

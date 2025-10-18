@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/vehicle_selection_list.dart';
 import '../widgets/location_selection_list.dart';
 import '../services/booking_service.dart';
+import '../services/vehicle_service.dart';
 import '../services/models/service_vehicle_models.dart';
 
 class RequestScreen extends StatefulWidget {
@@ -21,9 +22,14 @@ class _RequestScreenState extends State<RequestScreen> {
   String promoCode = '';
   bool isPromoApplied = false;
 
+
   // API Services
   List<CarWashService> _apiServices = [];
   bool _isLoadingServices = false;
+
+  // Vehicles data
+  List<Vehicle> _apiVehicles = [];
+  bool _isLoadingVehicles = false;
 
   final List<Map<String, dynamic>> packages = [
     {
@@ -118,7 +124,9 @@ class _RequestScreenState extends State<RequestScreen> {
   void initState() {
     super.initState();
     _loadServices();
+    _loadVehicles();
   }
+
 
   Future<void> _loadServices() async {
     setState(() {
@@ -139,6 +147,31 @@ class _RequestScreenState extends State<RequestScreen> {
     } finally {
       setState(() {
         _isLoadingServices = false;
+      });
+    }
+  }
+
+  Future<void> _loadVehicles() async {
+    setState(() {
+      _isLoadingVehicles = true;
+    });
+
+    try {
+      final vehicleService = VehicleService();
+      final response = await vehicleService.getVehicles();
+      
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _apiVehicles = response.data!;
+        });
+      } else {
+        print('Failed to load vehicles: ${response.error}');
+      }
+    } catch (e) {
+      print('Failed to load vehicles: $e');
+    } finally {
+      setState(() {
+        _isLoadingVehicles = false;
       });
     }
   }
@@ -493,8 +526,69 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   Widget _buildCarSelection() {
+    if (_isLoadingVehicles) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF0D4A58),
+        ),
+      );
+    }
+
+    if (_apiVehicles.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.directions_car_outlined,
+              size: 64,
+              color: Color(0xFF666666),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No vehicles found',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF333333),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add your first vehicle to continue',
+              style: TextStyle(
+                fontFamily: 'Mulish',
+                fontSize: 14,
+                color: Color(0xFF666666),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/add-car'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0D4A58),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Add Vehicle',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return VehicleSelectionList(
-      vehicles: cars,
+      vehicles: _apiVehicles,
       selectedIndex: selectedCarIndex,
       onVehicleSelected: (index) {
         setState(() {

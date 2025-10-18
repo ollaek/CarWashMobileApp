@@ -261,7 +261,14 @@ abstract class ApiClient {
 
   // Vehicles
   @GET('/api/Vehicles')
-  Future<HttpResponse<dynamic>> getVehicles(
+  Future<HttpResponse<dynamic>> getAllVehicles(
+    @Query('PageNumber') int? pageNumber,
+    @Query('PageSize') int? pageSize,
+  );
+
+  @GET('/api/Vehicles/user/{userId}')
+  Future<HttpResponse<dynamic>> getUserVehicles(
+    @Path('userId') int userId,
     @Query('PageNumber') int? pageNumber,
     @Query('PageSize') int? pageSize,
   );

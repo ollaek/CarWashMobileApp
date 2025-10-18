@@ -1358,7 +1358,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<HttpResponse<dynamic>> getVehicles(
+  Future<HttpResponse<dynamic>> getAllVehicles(
     int? pageNumber,
     int? pageSize,
   ) async {
@@ -1375,6 +1375,36 @@ class _ApiClient implements ApiClient {
           .compose(
             _dio.options,
             '/api/Vehicles',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<dynamic>> getUserVehicles(
+    int userId,
+    int? pageNumber,
+    int? pageSize,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'PageNumber': pageNumber,
+      r'PageSize': pageSize,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<dynamic>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/Vehicles/user/${userId}',
             queryParameters: queryParameters,
             data: _data,
           )
