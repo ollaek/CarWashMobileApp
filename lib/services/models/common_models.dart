@@ -86,6 +86,94 @@ class UpdatePreferencesRequest {
   Map<String, dynamic> toJson() => _$UpdatePreferencesRequestToJson(this);
 }
 
+@JsonSerializable()
+class UserProfile {
+  UserProfile({
+    this.id,
+    this.fullName,
+    this.email,
+    this.phoneNumber,
+    this.countryCode,
+    this.profileImageUrl,
+    this.isEmailVerified,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final int? id;
+  final String? fullName;
+  final String? email;
+  final String? phoneNumber;
+  final String? countryCode;
+  final String? profileImageUrl;
+  final bool? isEmailVerified;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
+  Map<String, dynamic> toJson() => _$UserProfileToJson(this);
+}
+
+@JsonSerializable()
+class LoginResponse {
+  LoginResponse({
+    this.accessToken,
+    this.refreshToken,
+    this.expiresIn,
+    this.user,
+  });
+
+  final String? accessToken;
+  final String? refreshToken;
+  final int? expiresIn;
+  final UserProfile? user;
+
+  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
+      _$LoginResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$LoginResponseToJson(this);
+}
+
+@JsonSerializable()
+class RegisterResponse {
+  RegisterResponse({
+    this.userId,
+    this.message,
+    this.requiresEmailVerification,
+  });
+
+  final int? userId;
+  final String? message;
+  final bool? requiresEmailVerification;
+
+  factory RegisterResponse.fromJson(Map<String, dynamic> json) =>
+      _$RegisterResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$RegisterResponseToJson(this);
+}
+
+@JsonSerializable()
+class Notification {
+  Notification({
+    this.id,
+    this.title,
+    this.message,
+    this.type,
+    this.isRead,
+    this.createdAt,
+  });
+
+  final int? id;
+  final String? title;
+  final String? message;
+  final String? type;
+  final bool? isRead;
+  final DateTime? createdAt;
+
+  factory Notification.fromJson(Map<String, dynamic> json) =>
+      _$NotificationFromJson(json);
+  Map<String, dynamic> toJson() => _$NotificationToJson(this);
+}
+
 
 
 

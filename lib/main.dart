@@ -23,8 +23,14 @@ import 'package:glint/pages/promotions_screen.dart';
 import 'package:glint/pages/support_chat_screen.dart';
 import 'package:glint/widgets/bottom_nav_bar.dart';
 import 'package:glint/theme/app_theme.dart';
+import 'package:glint/services/service_locator.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize service locator
+  await ServiceLocator().initialize();
+  
   runApp(const MyApp());
 }
 
