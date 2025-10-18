@@ -156,7 +156,10 @@ class _RequestScreenState extends State<RequestScreen> {
             color: Color(0xFF0D4A58),
             size: 24,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Since RequestScreen is part of main navigation, go to home
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          },
         ),
         title: Text(
           currentStep < 4
