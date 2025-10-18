@@ -121,6 +121,34 @@ class SocialLoginCommand {
   Map<String, dynamic> toJson() => _$SocialLoginCommandToJson(this);
 }
 
+@JsonSerializable()
+class VerifyPasswordChangeOtpRequest {
+  final String otp;
+
+  VerifyPasswordChangeOtpRequest({
+    required this.otp,
+  });
+
+  factory VerifyPasswordChangeOtpRequest.fromJson(Map<String, dynamic> json) =>
+      _$VerifyPasswordChangeOtpRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$VerifyPasswordChangeOtpRequestToJson(this);
+}
+
+@JsonSerializable()
+class ChangePasswordWithOtpRequest {
+  final String otp;
+  final String newPassword;
+
+  ChangePasswordWithOtpRequest({
+    required this.otp,
+    required this.newPassword,
+  });
+
+  factory ChangePasswordWithOtpRequest.fromJson(Map<String, dynamic> json) =>
+      _$ChangePasswordWithOtpRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$ChangePasswordWithOtpRequestToJson(this);
+}
+
 
 
 

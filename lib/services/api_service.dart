@@ -765,6 +765,52 @@ class ApiService {
       return ApiResponse.error('Health check failed: ${e.toString()}');
     }
   }
+
+  // Password Change with OTP
+  Future<ApiResponse<void>> requestPasswordChange() async {
+    try {
+      final response = await _apiClient.requestPasswordChange();
+      final data = response.data as Map<String, dynamic>;
+      
+      if (data['isSuccess'] == true) {
+        return ApiResponse.success(null);
+      } else {
+        return ApiResponse.error(data['message'] as String? ?? 'Failed to request password change');
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+  }
+
+  Future<ApiResponse<void>> verifyPasswordChangeOtp(VerifyPasswordChangeOtpRequest request) async {
+    try {
+      final response = await _apiClient.verifyPasswordChangeOtp(request);
+      final data = response.data as Map<String, dynamic>;
+      
+      if (data['isSuccess'] == true) {
+        return ApiResponse.success(null);
+      } else {
+        return ApiResponse.error(data['message'] as String? ?? 'Failed to verify OTP');
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+  }
+
+  Future<ApiResponse<void>> changePasswordWithOtp(ChangePasswordWithOtpRequest request) async {
+    try {
+      final response = await _apiClient.changePasswordWithOtp(request);
+      final data = response.data as Map<String, dynamic>;
+      
+      if (data['isSuccess'] == true) {
+        return ApiResponse.success(null);
+      } else {
+        return ApiResponse.error(data['message'] as String? ?? 'Failed to change password');
+      }
+    } catch (e) {
+      return ApiResponse.error('Network error: ${e.toString()}');
+    }
+  }
 }
 
 // Generic API Response wrapper

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glint/services/auth_service.dart';
+import 'package:glint/services/api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _pushNotifications = true;
   bool _locationPermission = true;
+  final ApiService _apiService = ApiService();
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsItem(
                 iconPath: 'assets/icons/key.png',
                 title: 'Change Password',
+                onTap: _handleChangePassword,
                 child: Container(
                   width: 130,
                   padding: const EdgeInsets.symmetric(
@@ -390,5 +393,125 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     return content;
+  }
+
+  Future<void> _handleChangePassword() async {
+    // Show confirmation dialog
+    final bool? shouldProceed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Change Password',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Color(0xFF0D4A58),
+            ),
+          ),
+          content: const Text(
+            'We will send a verification code to your email address. You will need to verify the code before setting a new password.',
+            style: TextStyle(
+              fontFamily: 'Mulish',
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: Color(0xFF666666),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Color(0xFF666666),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0D4A58),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Continue',
+                style: TextStyle(
+                  fontFamily: 'Mulish',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldProceed == true) {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(
+                  color: Color(0xFF0D4A58),
+                  strokeWidth: 2,
+                ),
+                SizedBox(width: 16),
+                Text(
+                  'Sending OTP...',
+                  style: TextStyle(
+                    fontFamily: 'Mulish',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: Color(0xFF0D4A58),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      try {
+        final response = await _apiService.requestPasswordChange();
+
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        if (response.isSuccess) {
+          // Navigate to OTP verification screen
+          Navigator.pushNamed(context, '/change-password-otp');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.error ?? 'Failed to send OTP'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Network error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

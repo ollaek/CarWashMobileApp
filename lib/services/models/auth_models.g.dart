@@ -98,3 +98,25 @@ Map<String, dynamic> _$SocialLoginCommandToJson(SocialLoginCommand instance) =>
       'email': instance.email,
       'fullName': instance.fullName,
     };
+
+VerifyPasswordChangeOtpRequest _$VerifyPasswordChangeOtpRequestFromJson(
+  Map<String, dynamic> json,
+) => VerifyPasswordChangeOtpRequest(otp: json['otp'] as String);
+
+Map<String, dynamic> _$VerifyPasswordChangeOtpRequestToJson(
+  VerifyPasswordChangeOtpRequest instance,
+) => <String, dynamic>{'otp': instance.otp};
+
+ChangePasswordWithOtpRequest _$ChangePasswordWithOtpRequestFromJson(
+  Map<String, dynamic> json,
+) => ChangePasswordWithOtpRequest(
+  otp: json['otp'] as String,
+  newPassword: json['newPassword'] as String,
+);
+
+Map<String, dynamic> _$ChangePasswordWithOtpRequestToJson(
+  ChangePasswordWithOtpRequest instance,
+) => <String, dynamic>{
+  'otp': instance.otp,
+  'newPassword': instance.newPassword,
+};

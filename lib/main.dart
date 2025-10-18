@@ -14,6 +14,8 @@ import 'package:glint/pages/edit_profile_screen.dart';
 import 'package:glint/pages/location_picker_screen.dart';
 import 'package:glint/pages/settings_screen.dart';
 import 'package:glint/pages/notifications_screen.dart';
+import 'package:glint/pages/change_password_otp_screen.dart';
+import 'package:glint/pages/change_password_new_screen.dart';
 import 'package:glint/pages/order_complete_screen.dart';
 import 'package:glint/pages/vehicles_screen.dart';
 import 'package:glint/pages/locations_screen.dart';
@@ -52,6 +54,8 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => const SigninScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/notifications': (context) => const NotificationsScreen(),
+        '/change-password-otp': (context) => const ChangePasswordOtpScreen(),
+        '/change-password-new': (context) => const ChangePasswordNewScreen(),
         '/add-car': (context) => const AddCarScreen(),
         '/edit-profile': (context) => const EditProfileScreen(),
         '/location-picker': (context) => const LocationPickerScreen(),

@@ -249,6 +249,19 @@ abstract class ApiClient {
     @Body() ChangePasswordRequest body,
   );
 
+  @POST('/api/Settings/request-password-change')
+  Future<HttpResponse<dynamic>> requestPasswordChange();
+
+  @POST('/api/Settings/verify-password-change-otp')
+  Future<HttpResponse<dynamic>> verifyPasswordChangeOtp(
+    @Body() VerifyPasswordChangeOtpRequest body,
+  );
+
+  @POST('/api/Settings/change-password-with-otp')
+  Future<HttpResponse<dynamic>> changePasswordWithOtp(
+    @Body() ChangePasswordWithOtpRequest body,
+  );
+
   @DELETE('/api/Settings/delete-account')
   Future<HttpResponse<dynamic>> deleteAccount(
     @Body() DeleteAccountRequest body,
