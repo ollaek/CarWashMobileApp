@@ -4,6 +4,7 @@ import 'package:glint/services/models/auth_models.dart';
 
 class GoogleSignInService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com', // Replace with your actual client ID
     scopes: [
       'email',
       'profile',
