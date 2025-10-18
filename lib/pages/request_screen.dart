@@ -157,8 +157,15 @@ class _RequestScreenState extends State<RequestScreen> {
             size: 24,
           ),
           onPressed: () {
-            // Since RequestScreen is part of main navigation, go to home
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            // If we're in step 0 (service selection), go to home
+            // Otherwise, go to previous step
+            if (currentStep == 0) {
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            } else {
+              setState(() {
+                currentStep--;
+              });
+            }
           },
         ),
         title: Text(
