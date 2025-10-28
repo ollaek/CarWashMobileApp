@@ -158,7 +158,7 @@ class LocationSelectionList extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
 
         // Add New Location Button
         if (showAddButton) ...[

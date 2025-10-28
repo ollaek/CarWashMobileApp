@@ -152,7 +152,7 @@ class VehicleSelectionList extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
 
         // Add New Vehicle Button
         if (showAddButton) ...[

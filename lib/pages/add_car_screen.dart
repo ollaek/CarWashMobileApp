@@ -334,7 +334,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
     String? Function(T?)? validator,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       items: items
           .map(
             (e) => DropdownMenuItem<T>(

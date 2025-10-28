@@ -421,7 +421,7 @@ class _RequestScreenState extends State<RequestScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
