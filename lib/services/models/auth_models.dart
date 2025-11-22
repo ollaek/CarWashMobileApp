@@ -101,6 +101,54 @@ class LogoutCommand {
   Map<String, dynamic> toJson() => _$LogoutCommandToJson(this);
 }
 
+@JsonSerializable()
+class SocialLoginCommand {
+  final String provider;
+  final String idToken;
+  final String? email;
+  final String? fullName;
+
+  SocialLoginCommand({
+    required this.provider,
+    required this.idToken,
+    this.email,
+    this.fullName,
+  });
+
+  factory SocialLoginCommand.fromJson(Map<String, dynamic> json) =>
+      _$SocialLoginCommandFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SocialLoginCommandToJson(this);
+}
+
+@JsonSerializable()
+class VerifyPasswordChangeOtpRequest {
+  final String otp;
+
+  VerifyPasswordChangeOtpRequest({
+    required this.otp,
+  });
+
+  factory VerifyPasswordChangeOtpRequest.fromJson(Map<String, dynamic> json) =>
+      _$VerifyPasswordChangeOtpRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$VerifyPasswordChangeOtpRequestToJson(this);
+}
+
+@JsonSerializable()
+class ChangePasswordWithOtpRequest {
+  final String otp;
+  final String newPassword;
+
+  ChangePasswordWithOtpRequest({
+    required this.otp,
+    required this.newPassword,
+  });
+
+  factory ChangePasswordWithOtpRequest.fromJson(Map<String, dynamic> json) =>
+      _$ChangePasswordWithOtpRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$ChangePasswordWithOtpRequestToJson(this);
+}
+
 
 
 

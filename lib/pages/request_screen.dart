@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/vehicle_selection_list.dart';
 import '../widgets/location_selection_list.dart';
+import '../services/booking_service.dart';
+import '../services/vehicle_service.dart';
+import '../services/models/service_vehicle_models.dart';
 
 class RequestScreen extends StatefulWidget {
   const RequestScreen({super.key});
@@ -18,6 +21,15 @@ class _RequestScreenState extends State<RequestScreen> {
   int selectedPaymentMethod = 0; // 0 = Credit Card, 1 = PayPal
   String promoCode = '';
   bool isPromoApplied = false;
+
+
+  // API Services
+  List<CarWashService> _apiServices = [];
+  bool _isLoadingServices = false;
+
+  // Vehicles data
+  List<Vehicle> _apiVehicles = [];
+  bool _isLoadingVehicles = false;
 
   final List<Map<String, dynamic>> packages = [
     {
@@ -109,6 +121,62 @@ class _RequestScreenState extends State<RequestScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadServices();
+    _loadVehicles();
+  }
+
+
+  Future<void> _loadServices() async {
+    setState(() {
+      _isLoadingServices = true;
+    });
+
+    try {
+      final bookingService = BookingService();
+      final response = await bookingService.getServices();
+
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _apiServices = response.data!;
+        });
+      }
+    } catch (e) {
+      print('Error loading services: $e');
+    } finally {
+      setState(() {
+        _isLoadingServices = false;
+      });
+    }
+  }
+
+  Future<void> _loadVehicles() async {
+    setState(() {
+      _isLoadingVehicles = true;
+    });
+
+    try {
+      final vehicleService = VehicleService();
+      final response = await vehicleService.getVehicles();
+      
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _apiVehicles = response.data!;
+        });
+      } else {
+        print('Failed to load vehicles: ${response.error}');
+      }
+    } catch (e) {
+      print('Failed to load vehicles: $e');
+    } finally {
+      setState(() {
+        _isLoadingVehicles = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -121,7 +189,17 @@ class _RequestScreenState extends State<RequestScreen> {
             color: Color(0xFF0D4A58),
             size: 24,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // If we're in step 0 (service selection), go to home
+            // Otherwise, go to previous step
+            if (currentStep == 0) {
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            } else {
+              setState(() {
+                currentStep--;
+              });
+            }
+          },
         ),
         title: Text(
           currentStep < 4
@@ -329,13 +407,34 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   Widget _buildServiceSelection() {
+    if (_isLoadingServices) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF0D4A58),
+        ),
+      );
+    }
+
+    if (_apiServices.isEmpty) {
+      return const Center(
+        child: Text(
+          'No services available',
+          style: TextStyle(
+            fontFamily: 'Mulish',
+            fontSize: 16,
+            color: Color(0xFF666666),
+          ),
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
-        ...packages.asMap().entries.map((entry) {
+        ..._apiServices.asMap().entries.map((entry) {
           final index = entry.key;
-          final package = entry.value;
+          final service = entry.value;
           final isSelected = selectedPackageIndex == index;
 
           return Container(
@@ -370,7 +469,7 @@ class _RequestScreenState extends State<RequestScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                package['name'],
+                                service.name,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w700,
@@ -381,7 +480,7 @@ class _RequestScreenState extends State<RequestScreen> {
                                 ),
                               ),
                               Text(
-                                package['price'],
+                                '${service.price.toStringAsFixed(0)} LE',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w700,
@@ -395,7 +494,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            package['duration'],
+                            '${service.durationInMinutes} min',
                             style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w500,
@@ -405,7 +504,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            package['services'].join(', '),
+                            service.description,
                             style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w500,
@@ -427,8 +526,69 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   Widget _buildCarSelection() {
+    if (_isLoadingVehicles) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF0D4A58),
+        ),
+      );
+    }
+
+    if (_apiVehicles.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.directions_car_outlined,
+              size: 64,
+              color: Color(0xFF666666),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No vehicles found',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF333333),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add your first vehicle to continue',
+              style: TextStyle(
+                fontFamily: 'Mulish',
+                fontSize: 14,
+                color: Color(0xFF666666),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/add-car'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0D4A58),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Add Vehicle',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return VehicleSelectionList(
-      vehicles: cars,
+      vehicles: _apiVehicles,
       selectedIndex: selectedCarIndex,
       onVehicleSelected: (index) {
         setState(() {
@@ -740,13 +900,13 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   Widget _buildOrderSummary() {
-    final selectedPackage = packages[selectedPackageIndex];
+    final selectedService = _apiServices[selectedPackageIndex];
     final selectedCar = cars[selectedCarIndex];
     final selectedAddress = addresses[selectedAddressIndex];
     final selectedTime = timeSlots[selectedTimeIndex];
 
     // Calculate pricing
-    final packagePrice = _extractPrice(selectedPackage['price']);
+    final packagePrice = selectedService.price;
     final serviceFee = 5.0;
     final total = packagePrice + serviceFee;
 
@@ -794,7 +954,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      selectedPackage['name'],
+                      selectedService.name,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w700,
@@ -804,7 +964,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      selectedPackage['services'].join(', '),
+                      selectedService.description,
                       style: const TextStyle(
                         fontFamily: 'Mulish',
                         fontWeight: FontWeight.w500,
@@ -880,7 +1040,7 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
           child: Column(
             children: [
-              _buildPriceRow(selectedPackage['name'], packagePrice),
+              _buildPriceRow(selectedService.name, packagePrice),
               const SizedBox(height: 8),
               _buildPriceRow('Service Fee', serviceFee),
               const Divider(color: Color(0xFFE0E0E0), height: 24),
@@ -1042,8 +1202,8 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   Widget _buildPaymentDetails() {
-    final selectedPackage = packages[selectedPackageIndex];
-    final packagePrice = _extractPrice(selectedPackage['price']);
+    final selectedService = _apiServices[selectedPackageIndex];
+    final packagePrice = selectedService.price;
     final serviceFee = 5.0;
     final discount = isPromoApplied ? 10.0 : 0.0; // 10% discount for demo
     final total = packagePrice + serviceFee - discount;
@@ -1280,7 +1440,7 @@ class _RequestScreenState extends State<RequestScreen> {
           ),
           child: Column(
             children: [
-              _buildPaymentPriceRow('Wash', packagePrice),
+              _buildPaymentPriceRow(selectedService.name, packagePrice),
               const SizedBox(height: 8),
               _buildPaymentPriceRow('Service Fee', serviceFee),
               if (isPromoApplied) ...[

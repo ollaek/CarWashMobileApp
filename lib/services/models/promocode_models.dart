@@ -14,6 +14,27 @@ class ValidatePromocodeRequest {
   Map<String, dynamic> toJson() => _$ValidatePromocodeRequestToJson(this);
 }
 
+@JsonSerializable()
+class PromocodeValidation {
+  PromocodeValidation({
+    this.isValid,
+    this.discountAmount,
+    this.discountPercentage,
+    this.finalAmount,
+    this.message,
+  });
+
+  final bool? isValid;
+  final double? discountAmount;
+  final double? discountPercentage;
+  final double? finalAmount;
+  final String? message;
+
+  factory PromocodeValidation.fromJson(Map<String, dynamic> json) =>
+      _$PromocodeValidationFromJson(json);
+  Map<String, dynamic> toJson() => _$PromocodeValidationToJson(this);
+}
+
 
 
 

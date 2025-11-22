@@ -82,3 +82,41 @@ LogoutCommand _$LogoutCommandFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$LogoutCommandToJson(LogoutCommand instance) =>
     <String, dynamic>{'refreshToken': instance.refreshToken};
+
+SocialLoginCommand _$SocialLoginCommandFromJson(Map<String, dynamic> json) =>
+    SocialLoginCommand(
+      provider: json['provider'] as String,
+      idToken: json['idToken'] as String,
+      email: json['email'] as String?,
+      fullName: json['fullName'] as String?,
+    );
+
+Map<String, dynamic> _$SocialLoginCommandToJson(SocialLoginCommand instance) =>
+    <String, dynamic>{
+      'provider': instance.provider,
+      'idToken': instance.idToken,
+      'email': instance.email,
+      'fullName': instance.fullName,
+    };
+
+VerifyPasswordChangeOtpRequest _$VerifyPasswordChangeOtpRequestFromJson(
+  Map<String, dynamic> json,
+) => VerifyPasswordChangeOtpRequest(otp: json['otp'] as String);
+
+Map<String, dynamic> _$VerifyPasswordChangeOtpRequestToJson(
+  VerifyPasswordChangeOtpRequest instance,
+) => <String, dynamic>{'otp': instance.otp};
+
+ChangePasswordWithOtpRequest _$ChangePasswordWithOtpRequestFromJson(
+  Map<String, dynamic> json,
+) => ChangePasswordWithOtpRequest(
+  otp: json['otp'] as String,
+  newPassword: json['newPassword'] as String,
+);
+
+Map<String, dynamic> _$ChangePasswordWithOtpRequestToJson(
+  ChangePasswordWithOtpRequest instance,
+) => <String, dynamic>{
+  'otp': instance.otp,
+  'newPassword': instance.newPassword,
+};

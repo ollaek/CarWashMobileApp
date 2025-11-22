@@ -72,6 +72,9 @@ abstract class ApiClient {
   @POST('/api/Auth/logout')
   Future<HttpResponse<dynamic>> logout(@Body() LogoutCommand body);
 
+  @POST('/api/Auth/social-login')
+  Future<HttpResponse<dynamic>> socialLogin(@Body() SocialLoginCommand body);
+
   // Bookings
   @GET('/api/Bookings')
   Future<HttpResponse<dynamic>> getBookings(
@@ -246,6 +249,19 @@ abstract class ApiClient {
     @Body() ChangePasswordRequest body,
   );
 
+  @POST('/api/Settings/request-password-change')
+  Future<HttpResponse<dynamic>> requestPasswordChange();
+
+  @POST('/api/Settings/verify-password-change-otp')
+  Future<HttpResponse<dynamic>> verifyPasswordChangeOtp(
+    @Body() VerifyPasswordChangeOtpRequest body,
+  );
+
+  @POST('/api/Settings/change-password-with-otp')
+  Future<HttpResponse<dynamic>> changePasswordWithOtp(
+    @Body() ChangePasswordWithOtpRequest body,
+  );
+
   @DELETE('/api/Settings/delete-account')
   Future<HttpResponse<dynamic>> deleteAccount(
     @Body() DeleteAccountRequest body,
@@ -258,7 +274,14 @@ abstract class ApiClient {
 
   // Vehicles
   @GET('/api/Vehicles')
-  Future<HttpResponse<dynamic>> getVehicles(
+  Future<HttpResponse<dynamic>> getAllVehicles(
+    @Query('PageNumber') int? pageNumber,
+    @Query('PageSize') int? pageSize,
+  );
+
+  @GET('/api/Vehicles/user/{userId}')
+  Future<HttpResponse<dynamic>> getUserVehicles(
+    @Path('userId') int userId,
     @Query('PageNumber') int? pageNumber,
     @Query('PageSize') int? pageSize,
   );

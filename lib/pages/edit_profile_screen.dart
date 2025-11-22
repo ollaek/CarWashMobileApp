@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -12,10 +13,10 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _fullNameController = TextEditingController(
-    text: 'Ethan Carter',
+    text: AuthService().currentUser?.fullName ?? 'User',
   );
   final TextEditingController _emailController = TextEditingController(
-    text: 'ethan.carter@email.com',
+    text: AuthService().currentUser?.email ?? 'user@email.com',
   );
 
   File? _selectedImage;

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:glint/services/booking_service.dart';
+import 'package:glint/services/models/service_vehicle_models.dart';
+import 'package:glint/services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,11 +18,16 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isUserInteracting = false;
   final int _unreadNotificationCount =
       1; // This would typically come from a service
+  
+  // Real data from API
+  List<CarWashService> _services = [];
+  bool _isLoadingServices = false;
 
   @override
   void initState() {
     super.initState();
     _startAutoSlide();
+    _loadServices();
   }
 
   @override
@@ -55,6 +63,35 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     });
+  }
+
+  Future<void> _loadServices() async {
+    setState(() {
+      _isLoadingServices = true;
+    });
+
+    try {
+      final bookingService = BookingService();
+      final response = await bookingService.getServices();
+
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _services = response.data!;
+        });
+      } else {
+        // Handle error - could show a snackbar or use fallback data
+        print('Failed to load services: ${response.error}');
+      }
+    } catch (e) {
+      // Handle network error
+      print('Network error loading services: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingServices = false;
+        });
+      }
+    }
   }
 
   List<Map<String, dynamic>> _getBannerData() {
@@ -97,10 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 40,
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Hello,',
                             style: TextStyle(
                               fontFamily: 'Mulish',
@@ -110,8 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           Text(
-                            'Ahmed',
-                            style: TextStyle(
+                            AuthService().currentUser?.fullName ?? 'User',
+                            style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               fontSize: 24,

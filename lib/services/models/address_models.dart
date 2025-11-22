@@ -62,6 +62,43 @@ class UpdateAddressRequest {
   Map<String, dynamic> toJson() => _$UpdateAddressRequestToJson(this);
 }
 
+@JsonSerializable()
+class Address {
+  Address({
+    this.id,
+    this.name,
+    this.street,
+    this.city,
+    this.state,
+    this.zipCode,
+    this.country,
+    this.fullAddress,
+    this.latitude,
+    this.longitude,
+    this.isDefault,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final int? id;
+  final String? name;
+  final String? street;
+  final String? city;
+  final String? state;
+  final String? zipCode;
+  final String? country;
+  final String? fullAddress;
+  final double? latitude;
+  final double? longitude;
+  final bool? isDefault;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  factory Address.fromJson(Map<String, dynamic> json) =>
+      _$AddressFromJson(json);
+  Map<String, dynamic> toJson() => _$AddressToJson(this);
+}
+
 
 
 

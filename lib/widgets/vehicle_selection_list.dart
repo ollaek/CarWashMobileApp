@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../services/models/service_vehicle_models.dart';
 
 class VehicleSelectionList extends StatelessWidget {
-  final List<Map<String, dynamic>> vehicles;
+  final List<dynamic> vehicles;
   final int? selectedIndex;
   final Function(int) onVehicleSelected;
   final VoidCallback? onAddVehicle;
@@ -39,6 +40,25 @@ class VehicleSelectionList extends StatelessWidget {
           final index = entry.key;
           final vehicle = entry.value;
           final isSelected = selectedIndex == index;
+
+          // Handle both Vehicle objects and Map<String, dynamic>
+          String brandName;
+          String modelName;
+          String details;
+
+          if (vehicle is Vehicle) {
+            brandName = vehicle.carBrand?.name ?? 'Unknown Brand';
+            modelName = vehicle.carModel?.name ?? 'Unknown Model';
+            details = '${vehicle.carColor?.name ?? 'Unknown Color'} • ${vehicle.licensePlateNumber ?? 'No Plate'}';
+          } else if (vehicle is Map<String, dynamic>) {
+            brandName = vehicle['brand'] ?? 'Unknown Brand';
+            modelName = vehicle['model'] ?? 'Unknown Model';
+            details = vehicle['details'] ?? 'No details';
+          } else {
+            brandName = 'Unknown Brand';
+            modelName = 'Unknown Model';
+            details = 'No details';
+          }
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -79,7 +99,7 @@ class VehicleSelectionList extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            vehicle['brand'],
+                            brandName,
                             style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w500,
@@ -89,7 +109,7 @@ class VehicleSelectionList extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            vehicle['model'],
+                            modelName,
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w700,
@@ -101,7 +121,7 @@ class VehicleSelectionList extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            vehicle['details'],
+                            details,
                             style: const TextStyle(
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w500,
@@ -191,7 +211,21 @@ class VehicleSelectionList extends StatelessWidget {
     );
   }
 
-  void _showVehicleOptions(BuildContext context, Map<String, dynamic> vehicle) {
+  void _showVehicleOptions(BuildContext context, dynamic vehicle) {
+    // Handle both Vehicle objects and Map<String, dynamic>
+    String brandName;
+    String modelName;
+
+    if (vehicle is Vehicle) {
+      brandName = vehicle.carBrand?.name ?? 'Unknown Brand';
+      modelName = vehicle.carModel?.name ?? 'Unknown Model';
+    } else if (vehicle is Map<String, dynamic>) {
+      brandName = vehicle['brand'] ?? 'Unknown Brand';
+      modelName = vehicle['model'] ?? 'Unknown Model';
+    } else {
+      brandName = 'Unknown Brand';
+      modelName = 'Unknown Model';
+    }
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -221,7 +255,7 @@ class VehicleSelectionList extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Edit ${vehicle['brand']} ${vehicle['model']}',
+                      'Edit $brandName $modelName',
                     ),
                     backgroundColor: const Color(0xFF0D4A58),
                   ),
@@ -246,7 +280,7 @@ class VehicleSelectionList extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Delete ${vehicle['brand']} ${vehicle['model']}',
+                      'Delete $brandName $modelName',
                     ),
                     backgroundColor: Colors.red,
                   ),
